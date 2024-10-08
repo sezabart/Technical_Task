@@ -15,7 +15,7 @@ Ensure you have the following installed:
 1. Clone the repository:
     ```sh
     git clone https://github.com/sezabart/Technical_Task.git
-    cd typless-technical-task
+    cd Technical_Task
     ```
 
 2. Create a virtual environment:
@@ -50,7 +50,7 @@ Before running the project, ensure you have set the Typless API key as an enviro
     ```sh
     export TYPLESS_API_KEY=your_api_key_here
     ```
-
+Make sure its just the 'code', without 'Token '.
 
 To start the project, run the following command:
 ```sh
@@ -64,6 +64,7 @@ The webserver will present itself on http://0.0.0.0:5001
 - `main.py`: The main entry point of the application.
 - `requirements.txt`: List of dependencies required for the project.
 - `README.md`: This file.
+- `data/docs.db` (after first startup) : SQLite database.
 
 ## Contributing
 

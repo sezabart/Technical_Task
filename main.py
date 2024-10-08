@@ -114,7 +114,7 @@ def post(file: UploadFile, doc_type: str):
                 *[
                     Tr(
                         Td(value['value']),
-                        Td(f'{value['confidence_score']*100:.2f}%')
+                        Td(f"{value['confidence_score']*100:.2f}%")
                     )
                     for value in field_dict['values']
                 ],
@@ -144,7 +144,6 @@ def post(file: UploadFile, doc_type: str):
 
 @rt("/save")
 def post(doc: str):
-    print(doc)
     doc = Doc(**json.loads(doc))
     # Insert the document into the database
     docs.insert(doc)

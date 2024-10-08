@@ -14,7 +14,7 @@ Ensure you have the following installed:
 
 1. Clone the repository:
     ```sh
-    git clone https://github.com/yourusername/typless-technical-task.git
+    git clone https://github.com/sezabart/Technical-Task.git
     cd typless-technical-task
     ```
 

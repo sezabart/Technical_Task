@@ -50,7 +50,7 @@ def get():
             Select(
                 Option('Simple Invoice', value='simple-invoice'),
                 Option('Receipt', value='receipt'),
-                Option('Report', value='report'),
+                Option('Registration Card', value='registration-card'),
                 name='doc_type',
                 required=True,
                 style='max-width: 25%'
@@ -61,7 +61,7 @@ def get():
         P('Processing...', id="processing", cls="htmx-indicator"),
         hx_post='/process', hx_swap='afterend', hx_indicator="#processing")
 
-    return Titled("KISS Corp.", frm)
+    return Titled("DigitalCarBook intake", frm)
 
 @rt("/process")
 def post(file: UploadFile, doc_type: str):

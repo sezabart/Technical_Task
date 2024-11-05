@@ -13,6 +13,8 @@ import base64
 import requests
 
 TYPLESS_API_KEY = os.getenv('TYPLESS_API_KEY')
+if not TYPLESS_API_KEY:
+    raise ValueError("Please set the TYPLESS_API_KEY environment variable")
 
 
 db = database('data/docs.db')
@@ -45,26 +47,31 @@ def get():
     frm = Form(
         H3('Upload a file to be processed by Typless:'),
         Group(
-            Input(type="file", name="file", accept=".png, .jpg, .jpeg, .JPG, .pdf", required=True, style='max-width: 50%;'),
+            Input(type="file", name="file", accept=".png, .jpg, .jpeg, .JPG, .pdf", required=True),
+            ),
+        Group(
             P('Select the type of document:'),
             Select(
                 Option('Simple Invoice', value='simple-invoice'),
-                Option('Receipt', value='receipt'),
+                Option('Garage Invoice', value='garage-invoice'),
                 Option('Report', value='report'),
                 name='doc_type',
                 required=True,
-                style='max-width: 25%'
+                style='max-width: 200px;'
             ),
-            style='display: flex; justify-content: space-between; align-items: center; width: 60%;',
+            style='display: flex; justify-content: space-between; align-items: center;',
         ),
         Button('Process'),
         P('Processing...', id="processing", cls="htmx-indicator"),
-        hx_post='/process', hx_swap='afterend', hx_indicator="#processing")
+        hx_post='/process', hx_swap='afterend', hx_indicator="#processing",
+        style='max-width: 500px;'
+    )
 
-    return Titled("KISS Corp.", frm)
+    return Titled("Typless example", frm)
 
 @rt("/process")
 def post(file: UploadFile, doc_type: str):
+
     # UploadFile(filename='ATL_2024-09-24_report.pdf', size=600810, headers=Headers({'content-disposition': 'form-data; name="file"; filename="ATL_2024-09-24_report.pdf"', 'content-type': 'application/pdf'}))
     # Read the file content
     file_content = file.file.read()
@@ -87,7 +94,7 @@ def post(file: UploadFile, doc_type: str):
         "accept": "application/json",
         "content-type": "application/json",
         "Authorization": f"Token {TYPLESS_API_KEY}"
-}
+    }
 
     response = requests.post(url, json=payload, headers=headers)
     
@@ -124,6 +131,52 @@ def post(file: UploadFile, doc_type: str):
         )
         for field_dict in extracted_fields
     ]
+
+
+
+    '''
+    "line_items": [
+        [
+            {
+                "values": [
+                    {
+                        "x": 324,
+                        "y": 761,
+                        "width": 304,
+                        "height": 26,
+                        "page_number": 0,
+                        "value": "IZP.LONEC-ZADNJI",
+                        "confidence_score": 0.5
+                    }
+                ],
+                "name": "product_description",
+                "data_type": "STRING"
+            },
+    '''
+    # Extract line items from the result
+    line_items = result.get('line_items', [])
+
+    # Create a table for line items
+    line_item_table = Table(
+        Tr(
+            Th('Product Number'),
+            Th('Product Description'),
+            Th('Quantity'),
+            Th('Price')
+        ),
+        *[
+            Tr(
+                Td(next((value['values'][0]['value'] for value in item if value['name'] == 'product_number'), '')),
+                Td(next((value['values'][0]['value'] for value in item if value['name'] == 'product_description'), '')),
+                Td(round(float(next((value['values'][0]['value'] for value in item if value['name'] == 'quantity'), '')),2)),
+                Td(round(float(next((value['values'][0]['value'] for value in item if value['name'] == 'price'), '')),2))
+            )
+            for item in line_items
+        ],
+    )
+
+
+
     doc_dict = {
         "filename":file.filename,
         "document_type":doc_type,
@@ -135,6 +188,8 @@ def post(file: UploadFile, doc_type: str):
                 P(f'Content type: {doc_type}'),
                 H3('Extracted fields:'),
                 Div(*field_elements),
+                H3('Line items:'),
+                line_item_table,
                 Button('Save', id='save_button'),
                 Hidden(json.dumps(doc_dict), name='doc'),
          header='Document uploaded successfully ✅',
